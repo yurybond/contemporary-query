@@ -182,13 +182,13 @@ public class QueryTest {
 
         assertOpportunity(opportunities.get(0));
 
-        System.assertNotEquals(opportunities.get(0).CreatedBy.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).Account.CreatedBy.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).Account.LastModifiedBy.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).LastModifiedBy.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).LastModifiedBy.LastName, null);
-        System.assertNotEquals(opportunities.get(0).Owner.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).Owner.LastName, null);
+        Assert.areNotEqual(opportunities.get(0).CreatedBy.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).Account.CreatedBy.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).Account.LastModifiedBy.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).LastModifiedBy.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).LastModifiedBy.LastName, null);
+        Assert.areNotEqual(opportunities.get(0).Owner.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).Owner.LastName, null);
     }
 
     @isTest
@@ -208,13 +208,13 @@ public class QueryTest {
 
         assertOpportunity(opportunities.get(0));
 
-        System.assertNotEquals(opportunities.get(0).CreatedBy.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).Account.CreatedBy.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).Account.LastModifiedBy.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).LastModifiedBy.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).LastModifiedBy.LastName, null);
-        System.assertNotEquals(opportunities.get(0).Owner.FirstName, null);
-        System.assertNotEquals(opportunities.get(0).Owner.LastName, null);
+        Assert.areNotEqual(opportunities.get(0).CreatedBy.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).Account.CreatedBy.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).Account.LastModifiedBy.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).LastModifiedBy.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).LastModifiedBy.LastName, null);
+        Assert.areNotEqual(opportunities.get(0).Owner.FirstName, null);
+        Assert.areNotEqual(opportunities.get(0).Owner.LastName, null);
     }
 
     @isTest
