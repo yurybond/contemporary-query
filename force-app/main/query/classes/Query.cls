@@ -1,28 +1,6 @@
-/*
- * MIT License
- *
- * Copyright (c) 2018 - 2020 Click to Cloud Pty Ltd, Propic Pty Ltd
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
 public class Query {
-    public static final String VERSION = '2.0.0-pre';
+
+    private static String DISTANCE_UNIT;
     
     private static Map<String, SObjectType> globalDescribe {
         get {
@@ -131,7 +109,7 @@ public class Query {
      * Only available in aggregate functions
      */
     public Query selectField(String fieldName, String alias) {
-        functionFieldList.add(new FunctionFieldTuple(EMPTY, fieldName, alias));
+        functionFieldList.add(new FunctionField(EMPTY, fieldName, alias));
         return this;
     }
 
@@ -144,72 +122,87 @@ public class Query {
     }
 
     public Query count(String field) {
-        functionFieldList.add(new FunctionFieldTuple(COUNT, field));
+        functionFieldList.add(new FunctionField(COUNT, field));
         return this;
     }
 
     public Query count(String field, String alias) {
-        functionFieldList.add(new FunctionFieldTuple(COUNT, field, alias));
+        functionFieldList.add(new FunctionField(COUNT, field, alias));
         return this;
     }
 
     public Query toLabel(String field) {
-        functionFieldList.add(new FunctionFieldTuple(TO_LABEL, field));
+        functionFieldList.add(new FunctionField(TO_LABEL, field));
         return this;
     }
 
     public Query toLabel(String field, String alias) {
-        functionFieldList.add(new FunctionFieldTuple(TO_LABEL, field, alias));
+        functionFieldList.add(new FunctionField(TO_LABEL, field, alias));
         return this;
     }
 
     public Query max(String field) {
-        functionFieldList.add(new FunctionFieldTuple(MAX, field));
+        functionFieldList.add(new FunctionField(MAX, field));
         return this;
     }
 
     public Query max(String field, String alias) {
-        functionFieldList.add(new FunctionFieldTuple(MAX, field, alias));
+        functionFieldList.add(new FunctionField(MAX, field, alias));
         return this;
     }
 
     public Query min(String field) {
-        functionFieldList.add(new FunctionFieldTuple(MIN, field));
+        functionFieldList.add(new FunctionField(MIN, field));
         return this;
     }
 
     public Query min(String field, String alias) {
-        functionFieldList.add(new FunctionFieldTuple(MIN, field, alias));
+        functionFieldList.add(new FunctionField(MIN, field, alias));
         return this;
     }
 
     public Query avg(String field) {
-        functionFieldList.add(new FunctionFieldTuple(AVG, field));
+        functionFieldList.add(new FunctionField(AVG, field));
         return this;
     }
 
     public Query avg(String field, String alias) {
-        functionFieldList.add(new FunctionFieldTuple(AVG, field, alias));
+        functionFieldList.add(new FunctionField(AVG, field, alias));
         return this;
     }
 
     public Query sum(String field) {
-        functionFieldList.add(new FunctionFieldTuple(SUM, field));
+        functionFieldList.add(new FunctionField(SUM, field));
         return this;
     }
 
     public Query sum(String field, String alias) {
-        functionFieldList.add(new FunctionFieldTuple(SUM, field, alias));
+        functionFieldList.add(new FunctionField(SUM, field, alias));
         return this;
     }
 
     public Query countDistinct(String field) {
-        functionFieldList.add(new FunctionFieldTuple(COUNT_DISTINCT, field));
+        functionFieldList.add(new FunctionField(COUNT_DISTINCT, field));
         return this;
     }
 
     public Query countDistinct(String field, String alias) {
-        functionFieldList.add(new FunctionFieldTuple(COUNT_DISTINCT, field, alias));
+        functionFieldList.add(new FunctionField(COUNT_DISTINCT, field, alias));
+        return this;
+    }
+
+    public Query distance(String field, Location geoLocation, String alias) {
+        functionFieldList.add(new FunctionFieldDistance(field, geoLocation, alias));
+        return this;
+    }
+
+    public Query distanceKilometers(String field, Location geoLocation, String alias) {
+        functionFieldList.add(new FunctionFieldDistance(field, geoLocation, alias, 'km'));
+        return this;
+    }
+
+    public Query distanceMiles(String field, Location geoLocation, String alias) {
+        functionFieldList.add(new FunctionFieldDistance(field, geoLocation, alias, 'mi'));
         return this;
     }
 
@@ -718,14 +711,7 @@ public class Query {
                 shiftFormatStringIndice(condition.conditionString, conditionArgs.size());
         newConditionString = '(' + newConditionString + ')';
         conditions.add(newConditionString);
-
-        Integer conditionArgsNum = conditionArgs.size();
-        
-
-        for (Object c : condition.args) { 
-            conditionArgs.put('conditionArgs' + (i + conditionArgsNum), c);
-        }
-
+        conditionArgs.addAll(condition.args);
         return this;
     }
 
@@ -1370,6 +1356,16 @@ public class Query {
         return new DateLiteral(name, num);
     }
 
+    public Query setDistanceUnitMiles() {
+        DISTANCE_UNIT = 'mi';
+        return this;
+    }
+
+    public Query setDistanceUnitKilometers() {
+        DISTANCE_UNIT = 'km';
+        return this;
+    }
+
     public Query setLimit(Integer n) {
         sizeLimit = n;
 
@@ -1501,11 +1497,7 @@ public class Query {
     }
 
     public Query setNamespace(String namespace) {
-        if (String.isBlank(namespace)) {
-            this.namespace = '';
-        } else {
-            this.namespace = namespace;
-        }
+        this.namespace = String.isBlank(namespace) ? '' : namespace;
         return this;
     }
 
@@ -1583,12 +1575,12 @@ public class Query {
 
     public List<SObject> toSObjectList() {
         String queryString = formQueryString();
-        return Database.queryWithBinds(queryString, conditionArgs);
+        return Database.query(queryString);
     }
 
     public List<AggregateResult> aggregate() {
         String queryString = formQueryString();
-        return Database.queryWithBinds(queryString, conditionArgs);
+        return Database.query(queryString);
     }
 
     public Integer countQuery() {
@@ -1628,10 +1620,71 @@ public class Query {
     private ParentFieldSetting parentFieldSetting;
 
     private List<String> conditions = new List<String>();
+    @testVisible
+    private static final Integer maxArgSize = 60;
     private Integer finalConditionArgsIdx = 0;
-    //private List<Object> conditionArgs = new List<Object>();
-    private Map<String,Object> conditionArgs = new List<String, Object>();
+    private List<Object> conditionArgs = new List<Object>();
     private List<Object> finalConditionArgs = new List<Object>();
+    private Object conditionArgs0;
+    private Object conditionArgs1;
+    private Object conditionArgs2;
+    private Object conditionArgs3;
+    private Object conditionArgs4;
+    private Object conditionArgs5;
+    private Object conditionArgs6;
+    private Object conditionArgs7;
+    private Object conditionArgs8;
+    private Object conditionArgs9;
+    private Object conditionArgs10;
+    private Object conditionArgs11;
+    private Object conditionArgs12;
+    private Object conditionArgs13;
+    private Object conditionArgs14;
+    private Object conditionArgs15;
+    private Object conditionArgs16;
+    private Object conditionArgs17;
+    private Object conditionArgs18;
+    private Object conditionArgs19;
+    private Object conditionArgs20;
+    private Object conditionArgs21;
+    private Object conditionArgs22;
+    private Object conditionArgs23;
+    private Object conditionArgs24;
+    private Object conditionArgs25;
+    private Object conditionArgs26;
+    private Object conditionArgs27;
+    private Object conditionArgs28;
+    private Object conditionArgs29;
+    private Object conditionArgs30;
+    private Object conditionArgs31;
+    private Object conditionArgs32;
+    private Object conditionArgs33;
+    private Object conditionArgs34;
+    private Object conditionArgs35;
+    private Object conditionArgs36;
+    private Object conditionArgs37;
+    private Object conditionArgs38;
+    private Object conditionArgs39;
+    private Object conditionArgs40;
+    private Object conditionArgs41;
+    private Object conditionArgs42;
+    private Object conditionArgs43;
+    private Object conditionArgs44;
+    private Object conditionArgs45;
+    private Object conditionArgs46;
+    private Object conditionArgs47;
+    private Object conditionArgs48;
+    private Object conditionArgs49;
+    private Object conditionArgs50;
+    private Object conditionArgs51;
+    private Object conditionArgs52;
+    private Object conditionArgs53;
+    private Object conditionArgs54;
+    private Object conditionArgs55;
+    private Object conditionArgs56;
+    private Object conditionArgs57;
+    private Object conditionArgs58;
+    private Object conditionArgs59;
 
     private String conditionOperator = 'AND';
     private String optionalClause = '';
@@ -1696,22 +1749,99 @@ public class Query {
         }
     }
 
-    private List<FunctionFieldTuple> functionFieldList = new List<FunctionFieldTuple>();
-    private class FunctionFieldTuple {
-        private String function;
-        private String fieldName;
-        private String alias;
+    private virtual class FunctionField {
+        protected String Function = '';
+        protected String FieldName;
+        protected String Alias = '';
 
-        private FunctionFieldTuple(String function, String fieldName, String alias) {
-            this.function = function;
-            this.fieldName = fieldName;
-            this.alias = alias;
+        private FunctionField(String function, String fieldName, String alias) {
+            this.Function = function;
+            this.FieldName = fieldName;
+            this.Alias = alias;
         }
 
-        private FunctionFieldTuple(String function, String fieldName) {
+        private FunctionField(String function, String fieldName) {
             this(function, fieldName, null);
         }
+        
+        FunctionField setField(String fieldName) {
+            this.FieldName = fieldName;
+            return this;
+        }
+        FunctionField setField(Schema.SObjectField field) {
+            this.FieldName = field.getDescribe().getName();
+            return this;
+        }
+        FunctionField setAlias(String alias) {
+            this.Alias = alias == NULL ? '' : alias;
+            return this;
+        }
+
+        FunctionField setFunction(String function) {
+            this.Function = function;
+            return this;
+        }
+
+        virtual String getAsString() {
+            if (String.isBlank(this.Function)) {
+                return this.FieldName + ' ' + this.Alias;
+            } 
+            return this.Function + '(' + this.FieldName + ')' + (this.Alias == null ? '' : ' ' + this.Alias);
+        }
     }
+
+    private class FunctionFieldDistance extends FunctionField {
+        private Location GeoLocation;
+        private String DistanceUnit;
+
+        private FunctionFieldDistance(String fieldName, Location geoLocation, String alias, String distanceUnit) {
+            super(NULL, fieldName, alias);
+            this.GeoLocation = geoLocation;
+            this.DistanceUnit = distanceUnit;
+        }
+
+        private FunctionFieldDistance(String fieldName, Location geoLocation, String alias) {
+            this(fieldName, geoLocation, alias, DISTANCE_UNIT);
+        }
+
+        FunctionField setLocation(Location geoLocation) {
+            this.GeoLocation = geoLocation;
+            return this;
+        }
+
+        FunctionField setUnitMiles() {
+            this.DistanceUnit = 'mi';
+            return this;
+        }
+        FunctionField setUnitKilometers() {
+            this.DistanceUnit = 'km';
+            return this;
+        }
+
+        override String getAsString() {
+            this.DistanceUnit = this.DistanceUnit == NULL ?  DISTANCE_UNIT : this.DistanceUnit;
+
+            if (this.DistanceUnit == NULL) {
+                throw new QueryException(
+                    'Distance unit (\'mi\' or \'km\') is required for DISTANCE function. ' + 
+                    'Use query.setDistanceUnitMiles() or query.setDistanceKilometers()');
+            }
+            
+
+            return String.format(
+                'DISTANCE({0}, GEOLOCATION({1},{2}), \'\'{3}\'\') {4}', 
+                new List<String>{
+                     this.FieldName, 
+                     String.valueOf(this.GeoLocation.getLatitude()), 
+                     String.valueOf(this.GeoLocation.getLongitude()), 
+                     this.DistanceUnit,
+                     this.Alias
+                }
+            );
+        }
+    }
+
+    private List<FunctionField> functionFieldList = new List<FunctionField>();
 
     private Set<String> groupByFields = new Set<String>();
     Condition havingCondition;
@@ -1946,11 +2076,152 @@ public class Query {
             parentFieldSetting.isSystemContext;
     }
 
+    private void saveConditions(List<Object> args) {
+        finalConditionArgsIdx += args.size();
+        finalConditionArgs.addAll(args);
+    }
+
+    /*
+     * Save the arg to the member variable
+     */
+    private void saveConditionArg() {
+        for (Integer i = 0; i < finalConditionArgs.size(); i++) {
+            saveConditionArg(i, finalConditionArgs[i]);
+        }
+    }
+
+    private void saveConditionArg(Integer idx, Object arg) {
+        if (idx >= maxArgSize) {
+            throw new QueryException('The number of arguments exceeds the limit');
+        }
+
+        if (idx == 0) {
+            conditionArgs0 = arg;
+        } else if (idx == 1) {
+            conditionArgs1 = arg;
+        } else if (idx == 2) {
+            conditionArgs2 = arg;
+        } else if (idx == 3) {
+            conditionArgs3 = arg;
+        } else if (idx == 4) {
+            conditionArgs4 = arg;
+        } else if (idx == 5) {
+            conditionArgs5 = arg;
+        } else if (idx == 6) {
+            conditionArgs6 = arg;
+        } else if (idx == 7) {
+            conditionArgs7 = arg;
+        } else if (idx == 8) {
+            conditionArgs8 = arg;
+        } else if (idx == 9) {
+            conditionArgs9 = arg;
+        } else if (idx == 10) {
+            conditionArgs10 = arg;
+        } else if (idx == 11) {
+            conditionArgs11 = arg;
+        } else if (idx == 12) {
+            conditionArgs12 = arg;
+        } else if (idx == 13) {
+            conditionArgs13 = arg;
+        } else if (idx == 14) {
+            conditionArgs14 = arg;
+        } else if (idx == 15) {
+            conditionArgs15 = arg;
+        } else if (idx == 16) {
+            conditionArgs16 = arg;
+        } else if (idx == 17) {
+            conditionArgs17 = arg;
+        } else if (idx == 18) {
+            conditionArgs18 = arg;
+        } else if (idx == 19) {
+            conditionArgs19 = arg;
+        } else if (idx == 20) {
+            conditionArgs20 = arg;
+        } else if (idx == 21) {
+            conditionArgs21 = arg;            
+        } else if (idx == 22) {
+            conditionArgs22 = arg;
+        } else if (idx == 23) {
+            conditionArgs23 = arg;
+        } else if (idx == 24) {
+            conditionArgs24 = arg;
+        } else if (idx == 25) {
+            conditionArgs25 = arg;
+        } else if (idx == 26) {
+            conditionArgs26 = arg;
+        } else if (idx == 27) {
+            conditionArgs27 = arg;
+        } else if (idx == 28) {
+            conditionArgs28 = arg;
+        } else if (idx == 29) {
+            conditionArgs29 = arg;
+        } else if (idx == 30) {
+            conditionArgs30 = arg;
+        } else if (idx == 31) {
+            conditionArgs31 = arg;
+        } else if (idx == 32) {
+            conditionArgs32 = arg;
+        } else if (idx == 33) {
+            conditionArgs33 = arg;
+        } else if (idx == 34) {
+            conditionArgs34 = arg;
+        } else if (idx == 35) {
+            conditionArgs35 = arg;
+        } else if (idx == 36) {
+            conditionArgs36 = arg;
+        } else if (idx == 37) {
+            conditionArgs37 = arg;
+        } else if (idx == 38) {
+            conditionArgs38 = arg;
+        } else if (idx == 39) {
+            conditionArgs39 = arg;
+        } else if (idx == 40) {
+            conditionArgs40 = arg;
+        } else if (idx == 41) {
+            conditionArgs41 = arg;            
+        } else if (idx == 42) {
+            conditionArgs42 = arg;
+        } else if (idx == 43) {
+            conditionArgs43 = arg;
+        } else if (idx == 44) {
+            conditionArgs44 = arg;
+        } else if (idx == 45) {
+            conditionArgs45 = arg;
+        } else if (idx == 46) {
+            conditionArgs46 = arg;
+        } else if (idx == 47) {
+            conditionArgs47 = arg;
+        } else if (idx == 48) {
+            conditionArgs48 = arg;
+        } else if (idx == 49) {
+            conditionArgs49 = arg;
+        } else if (idx == 50) {
+            conditionArgs50 = arg;
+        } else if (idx == 51) {
+            conditionArgs51 = arg;
+        } else if (idx == 52) {
+            conditionArgs52 = arg;
+        } else if (idx == 53) {
+            conditionArgs53 = arg;
+        } else if (idx == 54) {
+            conditionArgs54 = arg;
+        } else if (idx == 55) {
+            conditionArgs55 = arg;
+        } else if (idx == 56) {
+            conditionArgs56 = arg;
+        } else if (idx == 57) {
+            conditionArgs57 = arg;
+        } else if (idx == 58) {
+            conditionArgs58 = arg;
+        } else if (idx == 59) {
+            conditionArgs59 = arg;
+        }
+    }
 
     private String formQueryString() {
         String queryStr = formQueryStringPreformat();
-//>>>>>>>>>>>>>> here we need to use queryWithBinds(queryString, bindMap, accessLevel)
-        
+
+        saveConditionArg();
 
         // format the arguments
         List<String> args = new List<String>();
@@ -2057,9 +2328,12 @@ public class Query {
             aggregateString += ', ';
         }
 
-        for (FunctionFieldTuple tuple : functionFieldList) {
+        for (FunctionField tuple : functionFieldList) {
             String field = appendNamespaceToField(tuple.fieldName);
-            if (String.isNotBlank(tuple.function)) {
+            aggregateString += tuple.getAsString();
+            aggregateString += ', ';
+
+            /*if (String.isNotBlank(tuple.function)) {
                 aggregateString += tuple.function + '(' + field + ')';
             } else {
                 aggregateString += field + ' ';
@@ -2067,7 +2341,7 @@ public class Query {
             if (tuple.alias != null) {
                 aggregateString += tuple.alias;
             }
-            aggregateString += ', ';
+            aggregateString += ', ';*/
         }
 
         aggregateString = aggregateString.removeEnd(', ');
@@ -2089,6 +2363,7 @@ public class Query {
 
         // shift the arg index
         conditionString = shiftFormatStringIndice(conditionString, finalConditionArgsIdx);
+        saveConditions(conditionArgs);
 
         return conditionString;
     }
@@ -2096,6 +2371,9 @@ public class Query {
     private String formHavingString() {
         String conditionString =
                 shiftFormatStringIndice(havingCondition.conditionString, finalConditionArgsIdx);
+
+        // shift the arg index
+        saveConditions(havingCondition.args);
 
         return conditionString;
     }
@@ -2112,6 +2390,7 @@ public class Query {
             subqueryString += ')';
             subqueryString += ', ';
 
+            saveConditions(childQuery.conditionArgs);
         }
 
         return subqueryString;
