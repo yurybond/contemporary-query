@@ -96,7 +96,7 @@ List<Account> accounts =
     new Query('Account').
         setDistanceUnitMiles(). 
         selectFields('Name').
-        distanceKilometers('BillingAddress', geolocation, 'DistToOffice').
+        distance('BillingAddress', geolocation, 'DistToOffice').
         run();
 ```
 

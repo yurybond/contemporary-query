@@ -1764,24 +1764,6 @@ public class Query {
             this(function, fieldName, null);
         }
         
-        FunctionField setField(String fieldName) {
-            this.FieldName = fieldName;
-            return this;
-        }
-        FunctionField setField(Schema.SObjectField field) {
-            this.FieldName = field.getDescribe().getName();
-            return this;
-        }
-        FunctionField setAlias(String alias) {
-            this.Alias = alias == NULL ? '' : alias;
-            return this;
-        }
-
-        FunctionField setFunction(String function) {
-            this.Function = function;
-            return this;
-        }
-
         virtual String getAsString() {
             if (String.isBlank(this.Function)) {
                 return this.FieldName + ' ' + this.Alias;
@@ -1802,20 +1784,6 @@ public class Query {
 
         private FunctionFieldDistance(String fieldName, Location geoLocation, String alias) {
             this(fieldName, geoLocation, alias, DISTANCE_UNIT);
-        }
-
-        FunctionField setLocation(Location geoLocation) {
-            this.GeoLocation = geoLocation;
-            return this;
-        }
-
-        FunctionField setUnitMiles() {
-            this.DistanceUnit = 'mi';
-            return this;
-        }
-        FunctionField setUnitKilometers() {
-            this.DistanceUnit = 'km';
-            return this;
         }
 
         override String getAsString() {
@@ -2332,16 +2300,6 @@ public class Query {
             String field = appendNamespaceToField(tuple.fieldName);
             aggregateString += tuple.getAsString();
             aggregateString += ', ';
-
-            /*if (String.isNotBlank(tuple.function)) {
-                aggregateString += tuple.function + '(' + field + ')';
-            } else {
-                aggregateString += field + ' ';
-            }
-            if (tuple.alias != null) {
-                aggregateString += tuple.alias;
-            }
-            aggregateString += ', ';*/
         }
 
         aggregateString = aggregateString.removeEnd(', ');

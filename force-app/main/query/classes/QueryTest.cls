@@ -157,7 +157,8 @@ public class QueryTest {
                                  selectFields('Phone, SicDesc').
                                  selectFields(new List<String>{'NumberOfEmployees', 'Website'}).
                                  selectFields(new Set<String>{'Fax', 'ShippingState'}).
-                                 distanceKilometers('BillingAddress', geolocation, 'DistToOffice').
+                                 distanceKilometers('BillingAddress', geolocation, 'billingDist').
+                                 distance('ShippingAddress', geolocation, 'shippingDist').
                                  selectAllFields().
                                  run();
 
