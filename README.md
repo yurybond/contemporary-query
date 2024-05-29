@@ -85,6 +85,21 @@ List<Account> accounts =
     run();
 ```
 
+### Select distance for location fields
+
+This will query all Accounts from the database, selecting distance to specified location among other fields.
+Use `.setDistanceUnitMiles()` or `.setDistanceUnitKilometers()` to specify distance unit for whole query.
+
+```javascript
+Location geolocation = Location.newInstance(21.3068, -157.791);
+List<Account> accounts = 
+    new Query('Account').
+        setDistanceUnitMiles(). 
+        selectFields('Name').
+        distanceKilometers('BillingAddress', geolocation, 'DistToOffice').
+        run();
+```
+
 ### Get an account based on its Id
 
 This will query the Accounts with a specific Id, and return only one SObject as
