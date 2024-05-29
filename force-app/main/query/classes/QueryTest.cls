@@ -68,7 +68,7 @@ public class QueryTest {
 
     @isTest
     static void getSObjectTypeTest() {
-        System.assertEquals(
+        Assert.areEqual(
             new Query('Account').getSObjectType(),
             Account.getSObjectType()
         );
@@ -86,23 +86,23 @@ public class QueryTest {
             selectAllFields().
             fetch(1, 3);
 
-        System.assertEquals(accounts.size(), 2);
-        System.assertEquals(accounts.get(0).Name, 'Account 1');
-        System.assertEquals(accounts.get(1).Name, 'Account 2');
+        Assert.areEqual(accounts.size(), 2);
+        Assert.areEqual(accounts.get(0).Name, 'Account 1');
+        Assert.areEqual(accounts.get(1).Name, 'Account 2');
 
         Account account;
 
         List<Account> accountsList = new Query('Account').
             selectAllFields().
             fetch(2);
-        System.assertEquals(accountsList.get(0).Name, 'Account 0');
-        System.assertEquals(accountsList.get(1).Name, 'Account 1');
-        System.assertEquals(accountsList.size(), 2);
+        Assert.areEqual(accountsList.get(0).Name, 'Account 0');
+        Assert.areEqual(accountsList.get(1).Name, 'Account 1');
+        Assert.areEqual(accountsList.size(), 2);
 
         account = (Account)new Query('Account').
             selectAllFields().
             fetch();
-        System.assertEquals(account.Name, 'Account 0');
+        Assert.areEqual(account.Name, 'Account 0');
 
     }
 
@@ -112,7 +112,7 @@ public class QueryTest {
 
         List<Id> idList = new Query('Account').toIdList();
 
-        System.assertEquals(idList.size(), 1);
+        Assert.areEqual(idList.size(), 1);
     }
 
     @isTest
@@ -139,10 +139,10 @@ public class QueryTest {
 
         List<Account> accounts = new Query('Account').runPreservingIdOrder(idList);
 
-        System.assertEquals(accounts.get(0).Id, acc0.Id);
-        System.assertEquals(accounts.get(1).Id, acc1.Id);
-        System.assertEquals(accounts.get(2).Id, acc2.Id);
-        System.assertEquals(accounts.get(3).Id, acc0.Id);
+        Assert.areEqual(accounts.get(0).Id, acc0.Id);
+        Assert.areEqual(accounts.get(1).Id, acc1.Id);
+        Assert.areEqual(accounts.get(2).Id, acc2.Id);
+        Assert.areEqual(accounts.get(3).Id, acc0.Id);
     }
 
     @isTest
@@ -253,7 +253,7 @@ public class QueryTest {
                    byId(wrongId).
                    run();
 
-        System.assert(accounts.isEmpty());
+        Assert.isTrue(accounts.isEmpty());
     }
 
     @isTest
@@ -310,7 +310,7 @@ public class QueryTest {
                     addConditionEq('Phone', '+61 410 111 111').
                     run();
 
-        System.assert(accounts.isEmpty());
+        Assert.isTrue(accounts.isEmpty());
     }
 
     @isTest
@@ -415,7 +415,7 @@ public class QueryTest {
                    switchToConjunction().
                    run();
 
-        System.assert(accounts.isEmpty());
+        Assert.isTrue(accounts.isEmpty());
     }
 
     @isTest
@@ -444,8 +444,8 @@ public class QueryTest {
             addConditionIncludes('Channel', 'Channel1').
             run();
 
-        System.assertEquals(result.size(), 1);
-        System.assertEquals(result[0].Name, 'MyQuickText');
+        Assert.areEqual(result.size(), 1);
+        Assert.areEqual(result[0].Name, 'MyQuickText');
 
     }
 
@@ -470,8 +470,8 @@ public class QueryTest {
             addConditionExcludes('Channel', 'Channel2').
             run();
 
-        System.assertEquals(result.size(), 1);
-        System.assertEquals(result[0].Name, 'MyQuickText2');
+        Assert.areEqual(result.size(), 1);
+        Assert.areEqual(result[0].Name, 'MyQuickText2');
 
     }
 
@@ -521,7 +521,7 @@ public class QueryTest {
                                  setLimit(1).
                                  run();
 
-        System.assertEquals(accounts.size(), 1);
+        Assert.areEqual(accounts.size(), 1);
         assertAccount(accounts.get(0));
     }
 
@@ -540,8 +540,8 @@ public class QueryTest {
                     setOffset(2).
                     run();
 
-        System.assertEquals(accounts.size(), 2);
-        System.assertEquals(accounts.get(0).Name, 'Account 3');
+        Assert.areEqual(accounts.size(), 2);
+        Assert.areEqual(accounts.get(0).Name, 'Account 3');
     }
 
     @isTest
@@ -559,18 +559,18 @@ public class QueryTest {
                     orderBy('Rating', 'DESC').
                     run();
 
-        System.assertEquals(accounts.get(0).Name, 'Account 2');
-        System.assertEquals(accounts.get(1).Name, 'Account 3');
-        System.assertEquals(accounts.get(2).Name, 'Account 1');
+        Assert.areEqual(accounts.get(0).Name, 'Account 2');
+        Assert.areEqual(accounts.get(1).Name, 'Account 3');
+        Assert.areEqual(accounts.get(2).Name, 'Account 1');
         
         accounts = new Query('Account').
                 selectAllFields().
                 orderBy(Account.Rating, 'DESC').
                 run();
 
-        System.assertEquals(accounts.get(0).Name, 'Account 2');
-        System.assertEquals(accounts.get(1).Name, 'Account 3');
-        System.assertEquals(accounts.get(2).Name, 'Account 1');
+        Assert.areEqual(accounts.get(0).Name, 'Account 2');
+        Assert.areEqual(accounts.get(1).Name, 'Account 3');
+        Assert.areEqual(accounts.get(2).Name, 'Account 1');
     }
 
     @isTest
@@ -589,9 +589,9 @@ public class QueryTest {
                     orderBy('Phone', 'ASC').
                     run();
 
-        System.assertEquals(accounts.get(0).Name, 'Account 2');
-        System.assertEquals(accounts.get(1).Name, 'Account 1');
-        System.assertEquals(accounts.get(2).Name, 'Account 3');
+        Assert.areEqual(accounts.get(0).Name, 'Account 2');
+        Assert.areEqual(accounts.get(1).Name, 'Account 1');
+        Assert.areEqual(accounts.get(2).Name, 'Account 3');
     }
 
     @isTest
@@ -613,12 +613,12 @@ public class QueryTest {
                     orderBy('Phone', 'ASC', Query.NULLS_FIRST).
                     run();
 
-        System.assertEquals(accounts.get(0).Name, 'Account 6');
-        System.assertEquals(accounts.get(1).Name, 'Account 2');
-        System.assertEquals(accounts.get(2).Name, 'Account 4');
-        System.assertEquals(accounts.get(3).Name, 'Account 1');
-        System.assertEquals(accounts.get(4).Name, 'Account 3');
-        System.assertEquals(accounts.get(5).Name, 'Account 5');
+        Assert.areEqual(accounts.get(0).Name, 'Account 6');
+        Assert.areEqual(accounts.get(1).Name, 'Account 2');
+        Assert.areEqual(accounts.get(2).Name, 'Account 4');
+        Assert.areEqual(accounts.get(3).Name, 'Account 1');
+        Assert.areEqual(accounts.get(4).Name, 'Account 3');
+        Assert.areEqual(accounts.get(5).Name, 'Account 5');
         
         accounts = new Query('Account').
                 selectAllFields().
@@ -626,12 +626,12 @@ public class QueryTest {
                 orderBy(Account.Phone, 'ASC', Query.NULLS_FIRST).
                 run();
 
-        System.assertEquals(accounts.get(0).Name, 'Account 6');
-        System.assertEquals(accounts.get(1).Name, 'Account 2');
-        System.assertEquals(accounts.get(2).Name, 'Account 4');
-        System.assertEquals(accounts.get(3).Name, 'Account 1');
-        System.assertEquals(accounts.get(4).Name, 'Account 3');
-        System.assertEquals(accounts.get(5).Name, 'Account 5');
+        Assert.areEqual(accounts.get(0).Name, 'Account 6');
+        Assert.areEqual(accounts.get(1).Name, 'Account 2');
+        Assert.areEqual(accounts.get(2).Name, 'Account 4');
+        Assert.areEqual(accounts.get(3).Name, 'Account 1');
+        Assert.areEqual(accounts.get(4).Name, 'Account 3');
+        Assert.areEqual(accounts.get(5).Name, 'Account 5');
     }
 
     @isTest
@@ -653,10 +653,10 @@ public class QueryTest {
                     run();
 
         /*
-        System.assertEquals(accounts.get(0).Name, 'Account 4');
-        System.assertEquals(accounts.get(1).Name, 'Account 2');
-        System.assertEquals(accounts.get(2).Name, 'Account 1');
-        System.assertEquals(accounts.get(3).Name, 'Account 3');
+        Assert.areEqual(accounts.get(0).Name, 'Account 4');
+        Assert.areEqual(accounts.get(1).Name, 'Account 2');
+        Assert.areEqual(accounts.get(2).Name, 'Account 1');
+        Assert.areEqual(accounts.get(3).Name, 'Account 3');
         */
     }
 
@@ -679,10 +679,10 @@ public class QueryTest {
                     run();
 
         /*
-        System.assertEquals(accounts.get(0).Name, 'Account 1');
-        System.assertEquals(accounts.get(1).Name, 'Account 3');
-        System.assertEquals(accounts.get(2).Name, 'Account 2');
-        System.assertEquals(accounts.get(3).Name, 'Account 4');
+        Assert.areEqual(accounts.get(0).Name, 'Account 1');
+        Assert.areEqual(accounts.get(1).Name, 'Account 3');
+        Assert.areEqual(accounts.get(2).Name, 'Account 2');
+        Assert.areEqual(accounts.get(3).Name, 'Account 4');
         */
     }
 
@@ -698,7 +698,7 @@ public class QueryTest {
                    run();
 
         assertAccount(accounts.get(0));
-        System.assert(accounts.get(0).Opportunities.get(0).Id != null);
+        Assert.isTrue(accounts.get(0).Opportunities.get(0).Id != null);
 
         accounts = new Query('Account').
                    selectAllFields().
@@ -888,7 +888,7 @@ public class QueryTest {
         catch(Query.QueryConditionException e){
             thrownException=e;
         }
-        System.assert(thrownException != null);
+        Assert.isTrue(thrownException != null);
 
 
         thrownException=null;
@@ -900,7 +900,7 @@ public class QueryTest {
         catch(Query.QueryConditionException e){
             thrownException=e;
         }
-        System.assert(thrownException != null);
+        Assert.isTrue(thrownException != null);
     }
 
     @isTest
@@ -1047,18 +1047,18 @@ public class QueryTest {
             sum('NumberOfEmployees', 'sumEmployee').
             aggregate()[0];
 
-        System.assertEquals(result.get('countName'), 4);
-        System.assertEquals(result.get('expr0'), 4);
-        System.assertEquals(result.get('countRating'), 2);
-        System.assertEquals(result.get('expr1'), 2);
-        System.assertEquals(result.get('maxEmployee'), 7);
-        System.assertEquals(result.get('expr2'), 7);
-        System.assertEquals(result.get('minEmployee'), 1);
-        System.assertEquals(result.get('expr3'), 1);
-        System.assertEquals(result.get('avgEmployee'), 4);
-        System.assertEquals(result.get('expr4'), 4);
-        System.assertEquals(result.get('sumEmployee'), 16);
-        System.assertEquals(result.get('expr5'), 16);
+        Assert.areEqual(result.get('countName'), 4);
+        Assert.areEqual(result.get('expr0'), 4);
+        Assert.areEqual(result.get('countRating'), 2);
+        Assert.areEqual(result.get('expr1'), 2);
+        Assert.areEqual(result.get('maxEmployee'), 7);
+        Assert.areEqual(result.get('expr2'), 7);
+        Assert.areEqual(result.get('minEmployee'), 1);
+        Assert.areEqual(result.get('expr3'), 1);
+        Assert.areEqual(result.get('avgEmployee'), 4);
+        Assert.areEqual(result.get('expr4'), 4);
+        Assert.areEqual(result.get('sumEmployee'), 16);
+        Assert.areEqual(result.get('expr5'), 16);
     }
 
     @isTest
@@ -1080,13 +1080,13 @@ public class QueryTest {
             toLabel('StageName').
             byId(opp.Id).
             fetch();
-        System.assertEquals(opportunitiesOne.get('StageName'), 'New');
+        Assert.areEqual(opportunitiesOne.get('StageName'), 'New');
 
         Sobject opportunitiesTwo = new Query('Opportunity').
             toLabel('StageName', 'myStageName').
             byId(opp.Id).
             fetch();
-        System.assertEquals(opportunitiesTwo.get('myStageName'), 'New');
+        Assert.areEqual(opportunitiesTwo.get('myStageName'), 'New');
     }
 
     @isTest
@@ -1098,9 +1098,9 @@ public class QueryTest {
 
         insert new List<Account>{acc1, acc2, acc3, acc4};
 
-        System.assertEquals(4, new Query('Account').countQuery());
-        System.assertEquals(2, new Query('Account').addConditionEq('Rating', '1').countQuery());
-        System.assertEquals(2, new Query('Account').selectAllFields('Account').addConditionEq('Rating', '1').countQuery());
+        Assert.areEqual(4, new Query('Account').countQuery());
+        Assert.areEqual(2, new Query('Account').addConditionEq('Rating', '1').countQuery());
+        Assert.areEqual(2, new Query('Account').selectAllFields('Account').addConditionEq('Rating', '1').countQuery());
     }
 
     @isTest
@@ -1129,16 +1129,16 @@ public class QueryTest {
             resultMap.put((String)result.get('rate'), result);
         }
 
-        System.assertEquals(resultMap.get('1').get('countName'), 2);
-        System.assertEquals(resultMap.get('1').get('maxEmployee'), 5);
-        System.assertEquals(resultMap.get('1').get('minEmployee'), 1);
-        System.assertEquals(resultMap.get('1').get('avgEmployee'), 3);
-        System.assertEquals(resultMap.get('1').get('sumEmployee'), 6);
-        System.assertEquals(resultMap.get('9').get('countName'), 1);
-        System.assertEquals(resultMap.get('9').get('maxEmployee'), 3);
-        System.assertEquals(resultMap.get('9').get('minEmployee'), 3);
-        System.assertEquals(resultMap.get('9').get('avgEmployee'), 3);
-        System.assertEquals(resultMap.get('9').get('sumEmployee'), 3);
+        Assert.areEqual(resultMap.get('1').get('countName'), 2);
+        Assert.areEqual(resultMap.get('1').get('maxEmployee'), 5);
+        Assert.areEqual(resultMap.get('1').get('minEmployee'), 1);
+        Assert.areEqual(resultMap.get('1').get('avgEmployee'), 3);
+        Assert.areEqual(resultMap.get('1').get('sumEmployee'), 6);
+        Assert.areEqual(resultMap.get('9').get('countName'), 1);
+        Assert.areEqual(resultMap.get('9').get('maxEmployee'), 3);
+        Assert.areEqual(resultMap.get('9').get('minEmployee'), 3);
+        Assert.areEqual(resultMap.get('9').get('avgEmployee'), 3);
+        Assert.areEqual(resultMap.get('9').get('sumEmployee'), 3);
     }
 
     @isTest
@@ -1168,8 +1168,8 @@ public class QueryTest {
             resultMap.put((String)result.get('Rating'), result);
         }
 
-        System.assertEquals(resultMap.get('1').get('countName'), 2);
-        System.assertEquals(resultMap.get('9'), null);
+        Assert.areEqual(resultMap.get('1').get('countName'), 2);
+        Assert.areEqual(resultMap.get('9'), null);
     }
 
     @isTest
@@ -1187,7 +1187,7 @@ public class QueryTest {
             .allRows()
             .run();
 
-        System.assertEquals(3, allTasks.size());
+        Assert.areEqual(3, allTasks.size());
     }
 
     @isTest
@@ -1210,7 +1210,7 @@ public class QueryTest {
                     byId(opp.Id)).
             fetch();
 
-        System.assertEquals(acc.Id, acc2.Id);
+        Assert.areEqual(acc.Id, acc2.Id);
 
         Account acc3 = (Account)new Query('Account').
             lookup('Id', new Query('Opportunity').
@@ -1220,7 +1220,7 @@ public class QueryTest {
             addConditionEq('Name', 'New Account').
             fetch();
 
-        System.assertEquals(acc.Id, acc3.Id);
+        Assert.areEqual(acc.Id, acc3.Id);
 
         Opportunity opp2 = (Opportunity)new Query('Opportunity').
             lookup('AccountId', new Query('Account').
@@ -1228,7 +1228,7 @@ public class QueryTest {
                     byId(acc.Id)).
             fetch();
 
-        System.assertEquals(opp.Id, opp2.Id);
+        Assert.areEqual(opp.Id, opp2.Id);
     }
 
     static void antiJoinTest() {
@@ -1252,7 +1252,7 @@ public class QueryTest {
                     byId(opp.Id)).
             fetch();
 
-        System.assertEquals(acc2, acc3);
+        Assert.areEqual(acc2, acc3);
     }
     @isTest
     static void fieldSettingTest() {
@@ -1263,7 +1263,7 @@ public class QueryTest {
         setting.isNameField = true;
 
         Account acc = (Account)new Query('Account').selectAllFields(setting).byId(account.Id).fetch();
-        System.assertEquals(acc.Name, 'Account 1');
+        Assert.areEqual(acc.Name, 'Account 1');
     }
     @isTest
     static void isCalculatedFieldSettingAddsCalculatedFields(){
@@ -1282,11 +1282,11 @@ public class QueryTest {
                 byId(workorder.Id).
                 fetch();
         Test.stopTest();
-        System.assert(queriedOrder.isSet('LineItemCount'), 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true`, should return the calculated field `LineItemCount`.');
-        System.assert(queriedOrder.isSet('SubTotal'), 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true`, should return the calculated field `SubTotal`.');
-        System.assert(queriedOrder.isSet('TotalPrice'), 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true`, should return the calculated field `TotalPrice`.');
-        System.assertEquals(false, queriedOrder.isSet('WorkOrderNumber'), 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true`, should not return the non-calculated field `WorkOrderNumber`.');
-        System.assertEquals(2, queriedOrder.LineItemCount, 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true` and an Id for a Workorder that has 2 associated WorkOrderLineItems, should return "2" for the LineItemCount.');
+        Assert.isTrue(queriedOrder.isSet('LineItemCount'), 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true`, should return the calculated field `LineItemCount`.');
+        Assert.isTrue(queriedOrder.isSet('SubTotal'), 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true`, should return the calculated field `SubTotal`.');
+        Assert.isTrue(queriedOrder.isSet('TotalPrice'), 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true`, should return the calculated field `TotalPrice`.');
+        Assert.areEqual(false, queriedOrder.isSet('WorkOrderNumber'), 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true`, should not return the non-calculated field `WorkOrderNumber`.');
+        Assert.areEqual(2, queriedOrder.LineItemCount, 'Query.fetch(), when called with a FieldSetting that specifies `isCalculated = true` and an Id for a Workorder that has 2 associated WorkOrderLineItems, should return "2" for the LineItemCount.');
     }
     @isTest
     static void debugTest() {
@@ -1323,13 +1323,13 @@ public class QueryTest {
             addConditionEq('NumberOfEmployees', 1).
             debug();
 
-        System.assert(query != null);
+        Assert.isTrue(query != null);
     }
 
     @isTest
     static void debugInTheMiddleTest() {
         Integer c = new Query('Account').debug().countQuery();
-        System.assert(c != null);
+        Assert.isTrue(c != null);
     }
 
     @isTest
@@ -1392,23 +1392,23 @@ public class QueryTest {
     }
 
     static void assertAccount(Account acc) {
-        System.assertEquals(acc.Name, 'ABC Ltd');
-        System.assertEquals(acc.Phone, '+61 410 000 000');
-        System.assertEquals(acc.SicDesc, 'Aircraft');
-        System.assertEquals(acc.NumberOfEmployees, 10);
-        System.assertEquals(acc.Website, 'https://www.samplewebsite.com');
-        System.assertEquals(acc.Fax, '+61 2 0000 0000');
-        System.assertEquals(acc.ShippingState, 'Wyoming');
+        Assert.areEqual(acc.Name, 'ABC Ltd');
+        Assert.areEqual(acc.Phone, '+61 410 000 000');
+        Assert.areEqual(acc.SicDesc, 'Aircraft');
+        Assert.areEqual(acc.NumberOfEmployees, 10);
+        Assert.areEqual(acc.Website, 'https://www.samplewebsite.com');
+        Assert.areEqual(acc.Fax, '+61 2 0000 0000');
+        Assert.areEqual(acc.ShippingState, 'Wyoming');
     }
 
     static void assertOpportunity(Opportunity opp) {
-        System.assertEquals(opp.Name, 'New Opportunity');
-        System.assertEquals(opp.CloseDate, Date.today().addDays(3));
-        System.assertEquals(opp.Amount, 20112.79);
+        Assert.areEqual(opp.Name, 'New Opportunity');
+        Assert.areEqual(opp.CloseDate, Date.today().addDays(3));
+        Assert.areEqual(opp.Amount, 20112.79);
     }
 
     static void assertTask(Task task) {
-        System.assertEquals(task.Subject, 'New Task');
+        Assert.areEqual(task.Subject, 'New Task');
     }
 
 }
